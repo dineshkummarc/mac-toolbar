@@ -1,0 +1,132 @@
+<!DOCTYPE html>
+<html><head>
+	<title>OS X JavaScript Toolbar</title>
+	<script type="text/javascript" src="https://ajax.googleapis.com/ajax/libs/jquery/1.4.4/jquery.min.js"></script>
+	<script type="text/javascript" src="https://github.com/evanw/mac-toolbar/raw/master/mac-toolbar.js"></script>
+	<link rel="stylesheet" type="text/css" href="https://github.com/evanw/mac-toolbar/raw/master/mac-toolbar.css">
+	<script type="text/javascript"><!--
+
+$(document).ready(function() {
+	var toolbar = new Toolbar();
+	toolbar.setContents([
+		new Toolbar.Search('Search', 'Search by name'),
+		new Toolbar.Button('Back', 'left.png').click(function() {
+			var s = toolbar.contents[3];
+			s.setSelectedIndex((s.selectedIndex + s.names.length - 1) % s.names.length);
+		}),
+		new Toolbar.Button('Forward', 'right.png').click(function() {
+			var s = toolbar.contents[3];
+			s.setSelectedIndex((s.selectedIndex + 1) % s.names.length);
+		}),
+		new Toolbar.Segments('Color Space', ['RGB', 'HSV', 'CMYK', 'YUV']).setSelectedIndex(2),
+		new Toolbar.Button('Clear Day', 'sun.png').click(function() {
+			toolbar.contents[3].setSelectedIndex(0);
+		}),
+		new Toolbar.Button('Cloudy Day', 'sun-cloud.png').click(function() {
+			toolbar.contents[3].setSelectedIndex(1);
+		}),
+		new Toolbar.Button('Clear Night', 'moon.png').click(function() {
+			toolbar.contents[3].setSelectedIndex(2);
+		}),
+		new Toolbar.Button('Cloudy Night', 'moon-cloud.png').click(function() {
+			toolbar.contents[3].setSelectedIndex(3);
+		}),
+		new Toolbar.Segments('Framework', ['jQuery', 'Dojo', 'MooTools'])
+	]);
+
+	function resize() {
+		$('.contents').css({ top: toolbar.height() + 'px' });
+	}
+	$(window).resize(resize);
+	resize();
+});
+
+	// --></script>
+	<style type="text/css"><!--
+
+body { font: 13px Arial, sans-serif; }
+.contents { position: absolute; left: 0; right: 0; bottom: 0; overflow: auto; }
+.contents > div { max-width: 800px; margin: 0 auto; padding: 50px 50px 150px 50px; }
+pre { background: #EFEFEF; border: 1px solid #9F9F9F; padding: 5px; }
+pre, code { font: 11px Monaco, Consolas, monospace; }
+p, h1 { margin-top: 0; }
+h2 { margin-top: 50px; }
+h1, h2 { text-align: center; }
+a { color: inherit; }
+.object table { border-collapse: collapse; }
+.object table td { padding: 0 10px 0 0; }
+.object table td:first-child { text-align: right; }
+.desc { padding: 0 0 30px 30px; }
+
+	--></style>
+</head><body>
+	<div class="contents"><div>
+		<h1>OS X JavaScript Toolbar</h1>
+		<p>This JavaScript toolbar mimics the look and feel of toolbars in Mac OS X and has support for buttons, segmented controls, and a search box. Instead of hiding extra content behind a chevron, however, this toolbar wraps overflowed content onto a new line (try resizing your browser window). The source code is available at <a href="https://github.com/evanw/mac-toolbar">https://github.com/evanw/mac-toolbar</a> and depends on jQuery. The icons used in this demo were created by <a href="http://jonasraskdesign.com">Jonas Rask</a>.</p>
+
+		<h2>API</h2>
+
+		<h3>Toolbar</h3>
+		<div class="def"><code>new Toolbar(parentNode : HTMLElement)</code></div>
+		<div class="desc">Creates a new toolbar object inside the DOM element pointed to by <code>parentNode</code>, or inside <code>document.body</code> if <code>parentNode</code> is not specified.</div>
+		<div class="def"><code>.height() : Number</code></div>
+		<div class="desc">Returns the current height of the toolbar, in pixels.</div>
+		<div class="def"><code>.setContents(contents : Object[])</code></div>
+		<div class="desc">Set the items in the toolbar to <code>contents</code>, an array of objects (instances of <code>Toolbar.Button</code>, <code>Toolbar.Segments</code>, etc.)</div>
+
+		<h3>Toolbar.Button</h3>
+		<div class="def"><code>new Toolbar.Button(labelName : String, imageURL : String)</code></div>
+		<div class="desc">Creates a button using the image at <code>imageURL</code> and with the text <code>labelName</code> under it. The darkened image used when the button is pressed will be automatically generated via the HTML5 canvas API. Unfortunately this means that the button image must be on the same domain as the page, since reading pixels from an image is forbidden if this is not the case.</div>
+		<div class="def"><code>.click(clickHandler : Function)</code></div>
+		<div class="desc">Adds <code>clickHandler</code> to the list of functions that are called when the button is clicked. Returns <code>this</code>, which allows this function to be chained.</div>
+
+		<h3>Toolbar.Segments</h3>
+		<div class="def"><code>new Toolbar.Segments(labelName : String, segmentNames : String[])</code></div>
+		<div class="desc">Creates a segment control with one segment for each string in <code>segmentNames</code> and with the text <code>labelName</code> under it.</div>
+		<div class="def"><code>.change(changeHandler : Function)</code></div>
+		<div class="desc">Adds <code>changeHandler</code> to the list of functions that are called when the selected index is changed. The first argument of <code>changeHandler</code> will be the new selected index. Returns <code>this</code>, which allows this function to be chained.</div>
+		<div class="def"><code>.selectedIndex : Number</code></div>
+		<div class="desc">Accesses the index of the currently selected segment.</div>
+		<div class="def"><code>.setSelectedIndex(index : Number)</code></div>
+		<div class="desc">Selects the segment at <code>index</code>, or deselects all segments if <code>index</code> is an invalid index, and notifies all change handlers of the change. Returns <code>this</code>, which allows this function to be chained.</div>
+
+		<h3>Toolbar.Search</h3>
+		<div class="def"><code>new Toolbar.Search(labelName : String, placeholder : String)</code></div>
+		<div class="desc">Creates a search control that shows the text in <code>placeholder</code> when empty and with the text <code>labelName</code> under it.</div>
+		<div class="def"><code>.change(changeHandler : Function)</code></div>
+		<div class="desc">Adds <code>changeHandler</code> to the list of functions that are called when the text is changed. The first argument of <code>changeHandler</code> will be the new text. Returns <code>this</code>, which allows this function to be chained.</div>
+		<div class="def"><code>.text : String</code></div>
+		<div class="desc">Accesses the text in the search control.</div>
+		<div class="def"><code>.setText(text : String)</code></div>
+		<div class="desc">Changes the text in the search control to <code>text</code> and notifies all change handlers of the change. Returns <code>this</code>, which allows this function to be chained.</div>
+
+		<h2>Demo Source Code</h2>
+		<p>This code created the toolbar on this page:</p>
+		<pre>var toolbar = new Toolbar();
+toolbar.setContents([
+    new Toolbar.Search('Search', 'Search by name'),
+    new Toolbar.Button('Back', 'left.png').click(function() {
+        var s = toolbar.contents[3];
+        s.setSelectedIndex((s.selectedIndex + s.names.length - 1) % s.names.length);
+    }),
+    new Toolbar.Button('Forward', 'right.png').click(function() {
+        var s = toolbar.contents[3];
+        s.setSelectedIndex((s.selectedIndex + 1) % s.names.length);
+    }),
+    new Toolbar.Segments('Color Space', ['RGB', 'HSV', 'CMYK', 'YUV']).setSelectedIndex(2),
+    new Toolbar.Button('Clear Day', 'sun.png').click(function() {
+        toolbar.contents[3].setSelectedIndex(0);
+    }),
+    new Toolbar.Button('Cloudy Day', 'sun-cloud.png').click(function() {
+        toolbar.contents[3].setSelectedIndex(1);
+    }),
+    new Toolbar.Button('Clear Night', 'moon.png').click(function() {
+        toolbar.contents[3].setSelectedIndex(2);
+    }),
+    new Toolbar.Button('Cloudy Night', 'moon-cloud.png').click(function() {
+        toolbar.contents[3].setSelectedIndex(3);
+    }),
+    new Toolbar.Segments('Framework', ['jQuery', 'Dojo', 'MooTools'])
+]);</pre>
+	</div></div>
+</body></html>
