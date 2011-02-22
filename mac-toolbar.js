@@ -3,12 +3,11 @@ var Toolbar = (function() {
 		return text.replace(/&/g, '&amp;').replace(/</g, '&lt;').replace(/>/g, '&gt;').replace(/"/g, '&quot;').replace(/'/g, '&apos;');
 	}
 
-	function addHandler(handler) {
-		this.handlers.push(handler);
-		if (this.element) {
-			this._bindHandlers();
-		}
-		return this;
+	function __extends__(subclass, superclass) {
+	    function proxy() {}
+	    proxy.prototype = superclass.prototype;
+	    subclass.prototype = new proxy();
+	    subclass.prototype.constructor = subclass;
 	}
 
 	////////////////////////////////////////////////////////////////////////////////
@@ -45,20 +44,64 @@ var Toolbar = (function() {
 		for (var i = 0; i < contents.length; i++) {
 			contents[i].element = document.getElementById(this.element.id + '-' + i);
 			contents[i]._bindHandlers();
+			contents[i].setEnabled(contents[i].isEnabled);
+			if (contents[i].isFloatingRight) {
+				contents[i].floatRight();
+			}
 		}
 		this.contents = contents;
 	};
 
 	////////////////////////////////////////////////////////////////////////////////
+	// Toolbar.Base
+	////////////////////////////////////////////////////////////////////////////////
+
+	function Base(name) {
+		this.name = name;
+		this.handlers = [];
+		this.element = null;
+		this.isEnabled = true;
+		this.isFloatingRight = false;
+	}
+
+	Base.prototype.setEnabled = function(enabled) {
+		if (this.element) {
+			if (enabled) {
+				$(this.element).removeClass('disabled');
+				$(this.element).find('input').attr('disabled', false);
+			} else {
+				$(this.element).addClass('disabled');
+				$(this.element).find('input').attr('disabled', true);
+			}
+		}
+		this.isEnabled = enabled;
+		return this;
+	};
+
+	Base.prototype.floatRight = function() {
+		if (this.element) {
+			$(this.element).css({ 'float': 'right' });
+		}
+		this.isFloatingRight = true;
+		return this;
+	};
+
+	function addHandler(handler) {
+		this.handlers.push(handler);
+		if (this.element) {
+			this._bindHandlers();
+		}
+		return this;
+	}
+
+	////////////////////////////////////////////////////////////////////////////////
 	// Toolbar.Button
 	////////////////////////////////////////////////////////////////////////////////
 
-	Toolbar.Button = function(name, image) {
-		this.image = image;
-		this.name = name;
-		this.element = null;
-		this.handlers = [];
-		this.element = null;
+	__extends__(Button, Base);
+
+	function Button(name, image) {
+		Base.call(this, name);
 
 		// dynamically load the image since we draw the image to a canvas for darkening
 		var this_ = this;
@@ -67,19 +110,26 @@ var Toolbar = (function() {
 			if (this_.element) this_._setImage();
 		};
 		this.image.src = image;
-	};
+	}
 
-	Toolbar.Button.prototype.click = addHandler;
+	Button.prototype.click = addHandler;
 
-	Toolbar.Button.prototype._toHTML = function(id) {
+	Button.prototype._toHTML = function(id) {
 		return '<div id="' + id + '" class="section button"><canvas></canvas><div class="label">' + textToHTML(this.name) + '</div></div>';
 	};
 
-	Toolbar.Button.prototype._bindHandlers = function() {
+	Button.prototype._bindHandlers = function() {
 		var this_ = this;
-		for (var i = 0; i < this.handlers.length; i++) {
-			$(this.element).click(this.handlers[i]);
-		}
+		$(this.element).click(function() {
+			// ignore disabled elements
+			if (!this_.isEnabled) {
+				return;
+			}
+
+			for (var i = 0; i < this_.handlers.length; i++) {
+				this_.handlers[i]();
+			}
+		});
 
 		$(this.element).mouseover(function() {
 			$(this).addClass('hovered');
@@ -91,6 +141,11 @@ var Toolbar = (function() {
 		});
 
 		$(this.element).mousedown(function() {
+			// ignore disabled elements
+			if (!this_.isEnabled) {
+				return;
+			}
+
 			$(this).addClass('pressed');
 			this_._setImage();
 
@@ -105,7 +160,7 @@ var Toolbar = (function() {
 		this._setImage();
 	};
 
-	Toolbar.Button.prototype._setImage = function() {
+	Button.prototype._setImage = function() {
 		var c = this.element.firstChild.getContext('2d');
 		var w = c.canvas.width = this.image.width;
 		var h = c.canvas.height = this.image.height;
@@ -114,16 +169,21 @@ var Toolbar = (function() {
 		// darken the image during clicking
 		// for security reasons, this only works when the image is on the same domain!
 		if ($(this.element).is('.hovered.pressed')) {
-			var data = c.getImageData(0, 0, w, h);
-			for (var x = 0; x < w; x++) {
-				for (var y = 0; y < h; y++) {
-					var i = (x + y * w) * 4;
-					data.data[i + 0] *= 0.6;
-					data.data[i + 1] *= 0.6;
-					data.data[i + 2] *= 0.6;
+			try {
+				var data = c.getImageData(0, 0, w, h);
+				for (var x = 0; x < w; x++) {
+					for (var y = 0; y < h; y++) {
+						var i = (x + y * w) * 4;
+						data.data[i + 0] *= 0.6;
+						data.data[i + 1] *= 0.6;
+						data.data[i + 2] *= 0.6;
+					}
 				}
+				c.putImageData(data, 0, 0, 0, 0, w, h);
+			} catch (e) {
+				// this happens when there is a security error or when
+				// the image hasn't loaded yet and the size is 0x0
 			}
-			c.putImageData(data, 0, 0, 0, 0, w, h);
 		}
 	};
 
@@ -131,17 +191,18 @@ var Toolbar = (function() {
 	// Toolbar.Segments
 	////////////////////////////////////////////////////////////////////////////////
 
-	Toolbar.Segments = function(name, names) {
-		this.name = name;
+	__extends__(Segments, Base);
+
+	function Segments(name, names) {
+		Base.call(this, name);
+
 		this.names = names;
 		this.selectedIndex = -1;
-		this.handlers = [];
-		this.element = null;
-	};
+	}
 
-	Toolbar.Segments.prototype.change = addHandler;
+	Segments.prototype.change = addHandler;
 
-	Toolbar.Segments.prototype.setSelectedIndex = function(index) {
+	Segments.prototype.setSelectedIndex = function(index) {
 		$(this.element).find('.segment').each(function(segmentIndex) {
 			if (segmentIndex == index) {
 				$(this).addClass('selected');
@@ -156,7 +217,7 @@ var Toolbar = (function() {
 		return this;
 	};
 
-	Toolbar.Segments.prototype._toHTML = function(id) {
+	Segments.prototype._toHTML = function(id) {
 		var html = '';
 		for (var i = 0; i < this.names.length; i++) {
 			html += '<div class="segment';
@@ -167,10 +228,15 @@ var Toolbar = (function() {
 		return '<div id="' + id + '" class="section segments">' + html + '<div class="label">' + textToHTML(this.name) + '</div></div>';
 	};
 
-	Toolbar.Segments.prototype._bindHandlers = function() {
+	Segments.prototype._bindHandlers = function() {
 		var this_ = this;
 		$(this.element).find('.segment').each(function(index) {
 			$(this).mousedown(function() {
+				// ignore disabled elements
+				if (!this_.isEnabled) {
+					return;
+				}
+
 				this_.setSelectedIndex(index);
 			});
 		});
@@ -180,17 +246,18 @@ var Toolbar = (function() {
 	// Toolbar.Search
 	////////////////////////////////////////////////////////////////////////////////
 
-	Toolbar.Search = function(name, placeholder) {
-		this.name = name || 'Search';
+	__extends__(Search, Base);
+
+	function Search(name, placeholder) {
+		Base.call(this, name || 'Search');
+
 		this.placeholder = placeholder || '';
 		this.text = '';
-		this.handlers = [];
-		this.element = null;
-	};
+	}
 
-	Toolbar.Search.prototype.change = addHandler;
+	Search.prototype.change = addHandler;
 
-	Toolbar.Search.prototype.setText = function(text) {
+	Search.prototype.setText = function(text) {
 		$(this.element).val(text);
 		this.text = text;
 		for (var i = 0; i < this.handlers.length; i++) {
@@ -199,12 +266,12 @@ var Toolbar = (function() {
 		return this;
 	};
 
-	Toolbar.Search.prototype._toHTML = function(id) {
+	Search.prototype._toHTML = function(id) {
 		var html = '<input type="text" placeholder="' + textToHTML(this.placeholder) + '" value="' + textToHTML(this.text) + '">';
 		return '<div id="' + id + '" class="section search">' + html + '<div class="label">' + textToHTML(this.name) + '</div></div>';
 	};
 
-	Toolbar.Search.prototype._bindHandlers = function() {
+	Search.prototype._bindHandlers = function() {
 		var this_ = this;
 		var input = this.element.firstChild;
 		function update() {
@@ -214,6 +281,10 @@ var Toolbar = (function() {
 		$(input).bind('input', update);
 		$(input).bind('textInput', update);
 	};
+
+	Toolbar.Button = Button;
+	Toolbar.Segments = Segments;
+	Toolbar.Search = Search;
 
 	return Toolbar;
 })();
