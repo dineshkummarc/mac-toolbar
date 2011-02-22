@@ -169,16 +169,21 @@ var Toolbar = (function() {
 		// darken the image during clicking
 		// for security reasons, this only works when the image is on the same domain!
 		if ($(this.element).is('.hovered.pressed')) {
-			var data = c.getImageData(0, 0, w, h);
-			for (var x = 0; x < w; x++) {
-				for (var y = 0; y < h; y++) {
-					var i = (x + y * w) * 4;
-					data.data[i + 0] *= 0.6;
-					data.data[i + 1] *= 0.6;
-					data.data[i + 2] *= 0.6;
+			try {
+				var data = c.getImageData(0, 0, w, h);
+				for (var x = 0; x < w; x++) {
+					for (var y = 0; y < h; y++) {
+						var i = (x + y * w) * 4;
+						data.data[i + 0] *= 0.6;
+						data.data[i + 1] *= 0.6;
+						data.data[i + 2] *= 0.6;
+					}
 				}
+				c.putImageData(data, 0, 0, 0, 0, w, h);
+			} catch (e) {
+				// this happens when there is a security error or when
+				// the image hasn't loaded yet and the size is 0x0
 			}
-			c.putImageData(data, 0, 0, 0, 0, w, h);
 		}
 	};
 
