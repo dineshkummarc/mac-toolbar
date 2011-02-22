@@ -9,7 +9,7 @@
 $(document).ready(function() {
 	var toolbar = new Toolbar();
 	toolbar.setContents([
-		new Toolbar.Search('Search', 'Search by name'),
+		new Toolbar.Search('Search', 'Search by name').floatRight(),
 		new Toolbar.Button('Back', 'left.png').click(function() {
 			var s = toolbar.contents[3];
 			s.setSelectedIndex((s.selectedIndex + s.names.length - 1) % s.names.length);
@@ -31,7 +31,7 @@ $(document).ready(function() {
 		new Toolbar.Button('Cloudy Night', 'moon-cloud.png').click(function() {
 			toolbar.contents[3].setSelectedIndex(3);
 		}),
-		new Toolbar.Segments('Framework', ['jQuery', 'Dojo', 'MooTools'])
+		new Toolbar.Segments('Framework', ['jQuery', 'Dojo', 'MooTools']).setEnabled(false)
 	]);
 
 	function resize() {
@@ -79,6 +79,12 @@ a { color: inherit; }
 		<div class="desc">Creates a button using the image at <code>imageURL</code> and with the text <code>labelName</code> under it. The darkened image used when the button is pressed will be automatically generated via the HTML5 canvas API. Unfortunately this means that the button image must be on the same domain as the page, since reading pixels from an image is forbidden if this is not the case.</div>
 		<div class="def"><code>.click(clickHandler : Function)</code></div>
 		<div class="desc">Adds <code>clickHandler</code> to the list of functions that are called when the button is clicked. Returns <code>this</code>, which allows this function to be chained.</div>
+		<div class="def"><code>.isEnabled : Boolean</code></div>
+		<div class="desc">Accesses the enabled state of the control.</div>
+		<div class="def"><code>.setEnabled(isEnabled : Boolean)</code></div>
+		<div class="desc">Sets the enabled state of the control. Returns <code>this</code>, which allows this function to be chained.</div>
+		<div class="def"><code>.floatRight()</code></div>
+		<div class="desc">Uses <code>float:right</code> to position the control (instead of <code>float:left</code>). Returns <code>this</code>, which allows this function to be chained.</div>
 
 		<h3>Toolbar.Segments</h3>
 		<div class="def"><code>new Toolbar.Segments(labelName : String, segmentNames : String[])</code></div>
@@ -89,6 +95,12 @@ a { color: inherit; }
 		<div class="desc">Accesses the index of the currently selected segment.</div>
 		<div class="def"><code>.setSelectedIndex(index : Number)</code></div>
 		<div class="desc">Selects the segment at <code>index</code>, or deselects all segments if <code>index</code> is an invalid index, and notifies all change handlers of the change. Returns <code>this</code>, which allows this function to be chained.</div>
+		<div class="def"><code>.isEnabled : Boolean</code></div>
+		<div class="desc">Accesses the enabled state of the control.</div>
+		<div class="def"><code>.setEnabled(isEnabled : Boolean)</code></div>
+		<div class="desc">Sets the enabled state of the control. Returns <code>this</code>, which allows this function to be chained.</div>
+		<div class="def"><code>.floatRight()</code></div>
+		<div class="desc">Uses <code>float:right</code> to position the control (instead of <code>float:left</code>). Returns <code>this</code>, which allows this function to be chained.</div>
 
 		<h3>Toolbar.Search</h3>
 		<div class="def"><code>new Toolbar.Search(labelName : String, placeholder : String)</code></div>
@@ -99,12 +111,18 @@ a { color: inherit; }
 		<div class="desc">Accesses the text in the search control.</div>
 		<div class="def"><code>.setText(text : String)</code></div>
 		<div class="desc">Changes the text in the search control to <code>text</code> and notifies all change handlers of the change. Returns <code>this</code>, which allows this function to be chained.</div>
+		<div class="def"><code>.isEnabled : Boolean</code></div>
+		<div class="desc">Accesses the enabled state of the control.</div>
+		<div class="def"><code>.setEnabled(isEnabled : Boolean)</code></div>
+		<div class="desc">Sets the enabled state of the control. Returns <code>this</code>, which allows this function to be chained.</div>
+		<div class="def"><code>.floatRight()</code></div>
+		<div class="desc">Uses <code>float:right</code> to position the control (instead of <code>float:left</code>). Returns <code>this</code>, which allows this function to be chained.</div>
 
 		<h2>Demo Source Code</h2>
 		<p>This code created the toolbar on this page:</p>
 		<pre>var toolbar = new Toolbar();
 toolbar.setContents([
-    new Toolbar.Search('Search', 'Search by name'),
+    new Toolbar.Search('Search', 'Search by name').floatRight(),
     new Toolbar.Button('Back', 'left.png').click(function() {
         var s = toolbar.contents[3];
         s.setSelectedIndex((s.selectedIndex + s.names.length - 1) % s.names.length);
@@ -126,7 +144,7 @@ toolbar.setContents([
     new Toolbar.Button('Cloudy Night', 'moon-cloud.png').click(function() {
         toolbar.contents[3].setSelectedIndex(3);
     }),
-    new Toolbar.Segments('Framework', ['jQuery', 'Dojo', 'MooTools'])
+    new Toolbar.Segments('Framework', ['jQuery', 'Dojo', 'MooTools']).setEnabled(false)
 ]);</pre>
 	</div></div>
 </body></html>
