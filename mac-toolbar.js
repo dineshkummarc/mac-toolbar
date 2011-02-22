@@ -200,7 +200,7 @@ var Toolbar = (function() {
 	};
 
 	Toolbar.Search.prototype._toHTML = function(id) {
-		var html = '<input type="search" placeholder="' + textToHTML(this.placeholder) + '" value="' + textToHTML(this.text) + '">';
+		var html = '<input type="text" placeholder="' + textToHTML(this.placeholder) + '" value="' + textToHTML(this.text) + '">';
 		return '<div id="' + id + '" class="section search">' + html + '<div class="label">' + textToHTML(this.name) + '</div></div>';
 	};
 
